@@ -1,0 +1,25 @@
+services:
+  # Base de données PostgreSQL (Le cœur de tes données)
+  lifeflow-db:
+    image: postgres:15-alpine
+    container_name: lifeflow-db
+    restart: always
+    environment:
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: lifeflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Interface pour visualiser ta base de données (accessible sur localhost:8080)
+  adminer:
+    image: adminer
+    container_name: lifeflow-adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
