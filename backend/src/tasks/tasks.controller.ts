@@ -6,25 +6,38 @@ import {
   Param,
   Patch,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
+
+interface AuthenticatedRequest extends Request {
+  user: { userId: number; email: string };
+}
 
 @Controller('tasks')
+@UseGuards(AuthGuard('jwt'))
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post()
-  create(@Body() body: { title: string; description: string; userId: number }) {
+  create(
+    @Body() createTaskDto: CreateTaskDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.tasksService.createTask(
-      body.title,
-      body.description,
-      body.userId,
+      createTaskDto.title,
+      createTaskDto.description,
+      req.user.userId,
     );
   }
 
-  @Get('user/:userId')
-  findAll(@Param('userId') userId: string) {
-    return this.tasksService.getUserTasks(+userId); // Le + convertit le texte en nombre
+  @Get()
+  findAll(@Req() req: AuthenticatedRequest) {
+    return this.tasksService.getUserTasks(req.user.userId);
   }
 
   @Patch(':id')
